@@ -223,12 +223,35 @@ def get_code_files(repo_url: str):
         ".kt",
     )
 
+    ignored_directories = (
+        "docs/",
+        "docs_src/",
+        "tests/",
+        "test/",
+        "examples/",
+        "node_modules/",
+        "vendor/",
+        ".github/",
+    )
+
     code_files = [
         file
         for file in file_tree
         if file["type"] == "file"
         and file["name"].lower().endswith(supported_extensions)
+        and not any(
+            file["path"].startswith(directory)
+            for directory in ignored_directories
+        )
     ]
+
+    # Prioritize Python application files
+    code_files.sort(
+        key=lambda file: (
+            0 if file["name"].endswith(".py") else 1,
+            file["path"]
+        )
+    )
 
     return code_files
 
